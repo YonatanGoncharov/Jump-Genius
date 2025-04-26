@@ -3,23 +3,22 @@ using UnityEngine;
 public class Platform : MonoBehaviour
 {
     private BoxCollider2D boxCollider;
+    private SpriteRenderer spriteRenderer; // We'll use this to change color
 
     private void Awake()
     {
         boxCollider = GetComponent<BoxCollider2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
-    // Check if the player is inside the platform's collider
-    public bool IsPlayerOnPlatform(Vector2 playerPosition, float feetPositionY)
+    /// <summary>
+    /// Call this when an agent lands here for the first time.
+    /// </summary>
+    public void MarkAsDiscovered()
     {
-        // Get platform bounds
-        Bounds bounds = boxCollider.bounds;
-
-        // Only check the top surface of the platform
-        bool isAbove = playerPosition.y >= bounds.min.y && feetPositionY <= bounds.max.y + 0.2f; // Allow small tolerance
-        bool isInsideX = playerPosition.x >= bounds.min.x && playerPosition.x <= bounds.max.x;
-
-        return isAbove && isInsideX;
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = Color.green;
+        }
     }
-
 }
