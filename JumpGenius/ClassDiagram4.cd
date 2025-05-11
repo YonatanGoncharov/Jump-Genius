@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="GameManager">
+    <Position X="5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAQAAAAEAAAAAAAAAQAABABAAgACAAAABAQEA=</HashCode>
+      <FileName>Assets\Scripts\Game\GameManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MenuUI">
+    <Position X="6.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAIAAAAAAAI=</HashCode>
+      <FileName>Assets\Scripts\Game\MenuUi.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReplayManager">
+    <Position X="3.75" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQAAAACAAAEAAAAAAAAAAAAAAAAAgEAAAAAACAEA=</HashCode>
+      <FileName>Assets\Scripts\Game\ReplayManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlayerMovementController">
+    <Position X="10.75" Y="1" Width="2" />
+    <TypeIdentifier>
+      <HashCode>BESAgAYhAiECAFMUQCSICACEEioQEFIoAIEiGCBIAEA=</HashCode>
+      <FileName>Assets\Scripts\Player\PlayerMovementController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlayerMovementModel">
+    <Position X="8.5" Y="1" Width="2" />
+    <TypeIdentifier>
+      <HashCode>gBAAEAAQAAAAAAAAAAIAAAAAABAYAAAAAAAACAAQAAA=</HashCode>
+      <FileName>Assets\Scripts\Player\PlayerMovementModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

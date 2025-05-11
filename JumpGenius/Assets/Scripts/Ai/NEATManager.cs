@@ -20,8 +20,9 @@ public class NEATManager : MonoBehaviour
     private int currentGeneration;
     public int CurrentGeneration => currentGeneration;
 
-    // Best / checkpoint bookkeeping
+    // ★ track how high any agent has ever gotten ★
     public int HighestReachedStage { get; private set; }
+
     private Vector2 nextSpawnPoint;
     private Genome pioneerGenome;
     private bool checkpointQueued;
@@ -37,13 +38,11 @@ public class NEATManager : MonoBehaviour
     [HideInInspector] public GameObject agentPrefab;
     [HideInInspector] public Transform spawnPoint;
 
-    // ────────────────────────────────────────
     private void Awake()
     {
         bestPath = Path.Combine(Application.persistentDataPath, "BestGenome.json");
     }
 
-    // ────────────────────────────────────────
     public void BeginTraining()
     {
         evaluator = GetComponent<FitnessEvaluator>();
@@ -52,14 +51,13 @@ public class NEATManager : MonoBehaviour
         currentGeneration = 1;
         HighestReachedStage = 0;
         checkpointQueued = false;
-        LastBestFitness = 0;
-        AllTimeBestFitness = 0;
+        LastBestFitness = 0f;
+        AllTimeBestFitness = 0f;
         bestFitnessHistory.Clear();
 
         StartCoroutine(SpawnGeneration());
     }
 
-    // ───── Spawn entire generation (all agents in one frame) ─────
     private IEnumerator SpawnGeneration()
     {
         ClearAgents();
@@ -68,7 +66,6 @@ public class NEATManager : MonoBehaviour
         Vector2 spawn2D = checkpointQueued ? nextSpawnPoint : (Vector2)spawnPoint.position;
         checkpointQueued = false;
 
-        // pioneer genome …
         if (pioneerGenome != null)
         {
             population.Genomes[0] = pioneerGenome.Clone();
@@ -76,17 +73,14 @@ public class NEATManager : MonoBehaviour
         }
 
         int agentLayer = LayerMask.NameToLayer("Agent");
-        float z = spawnPoint.position.z;          // keep original Z
+        float z = spawnPoint.position.z;
 
         foreach (var g in population.Genomes)
         {
-            Vector3 pos3 = new Vector3(spawn2D.x, spawn2D.y, z);   // ← use correct z
-            GameObject obj = Instantiate(agentPrefab, pos3, Quaternion.identity);
-
+            var obj = Instantiate(agentPrefab, new Vector3(spawn2D.x, spawn2D.y, z), Quaternion.identity);
             obj.layer = agentLayer;
             foreach (Transform t in obj.GetComponentsInChildren<Transform>(true))
                 t.gameObject.layer = agentLayer;
-
             obj.GetComponent<AgentController>().Init(g, GetCurrentMoveLimit());
             agents.Add(obj);
         }
@@ -94,20 +88,19 @@ public class NEATManager : MonoBehaviour
         Debug.Log($"🔄 Generation {currentGeneration} spawned at {spawn2D}");
     }
 
-
     private void Update()
     {
         if (agents.Count == 0) return;
-        if (AllAgentsDead()) Evolve();
+        if (agents.All(a => a == null || a.GetComponent<AgentController>().IsDead))
+            Evolve();
     }
 
-    // ───────── Evolution cycle ─────────
     private void Evolve()
     {
         population.EvaluateFitness(gen =>
         {
-            var a = agents.FirstOrDefault(o => o && o.GetComponent<AgentController>().Genome == gen);
-            return a ? evaluator.EvaluateAgent(a.GetComponent<AgentController>()) : 0f;
+            var inst = agents.FirstOrDefault(a => a && a.GetComponent<AgentController>().Genome == gen);
+            return inst ? evaluator.EvaluateAgent(inst.GetComponent<AgentController>()) : 0f;
         });
 
         float genBest = population.Genomes.Max(g => g.Fitness);
@@ -117,9 +110,9 @@ public class NEATManager : MonoBehaviour
         if (genBest > AllTimeBestFitness)
         {
             AllTimeBestFitness = genBest;
-            Genome best = population.Genomes.First(g => g.Fitness == genBest);
+            var best = population.Genomes.First(g => g.Fitness == genBest);
             File.WriteAllText(bestPath, best.ToJson());
-            Debug.Log($"💾 Saved best genome ({genBest:F1})");
+            Debug.Log($"💾 New best saved ({genBest:F2})");
         }
 
         population.Evolve();
@@ -127,31 +120,42 @@ public class NEATManager : MonoBehaviour
         StartCoroutine(SpawnGeneration());
     }
 
-    // ───────── Checkpoint API (called by AgentController) ─────────
+    /// <summary>
+    /// Called by AgentController when an individual agent reaches a new stage.
+    /// </summary>
+    public void OnStageChanged(int stage)
+    {
+        if (stage > HighestReachedStage)
+            HighestReachedStage = stage;
+    }
+
+    /// <summary>
+    /// Called by AgentController when checkpointing (to carry over the “pioneer”).
+    /// </summary>
     public void RegisterCheckpoint(int stage, Vector2 spawnPos, Genome pioneer)
     {
-        HighestReachedStage = stage;
+        if (stage > HighestReachedStage)
+            HighestReachedStage = stage;
+
         nextSpawnPoint = spawnPos;
         pioneerGenome = pioneer.Clone();
         checkpointQueued = true;
-        Debug.Log($"🏁 Checkpoint stage {stage} at {spawnPos}");
     }
 
-    // keep UI/other scripts informed
-    public void OnStageChanged(int stage)
-    {
-        if (stage > HighestReachedStage) HighestReachedStage = stage;
-    }
-
-    // current move allowance per agent
+    /// <summary>How many moves each agent gets this gen.</summary>
     public int GetCurrentMoveLimit()
     {
-        int bonus = (CurrentGeneration / 10) * 5;  // +5 every 10 generations
+        int bonus = (CurrentGeneration / 10) * 5;  // +5 every 10 gens
         return 5 + bonus;
     }
 
-    // ───────── Helpers ─────────
     private bool AllAgentsDead() => agents.All(a => !a || a.GetComponent<AgentController>().IsDead);
-    private void ClearAgents() { foreach (var a in agents) if (a) Destroy(a); agents.Clear(); }
+
+    private void ClearAgents()
+    {
+        foreach (var a in agents) if (a) Destroy(a);
+        agents.Clear();
+    }
+
     public List<GameObject> GetAgents() => agents;
 }
