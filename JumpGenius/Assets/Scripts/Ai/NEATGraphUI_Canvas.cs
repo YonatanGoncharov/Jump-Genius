@@ -19,8 +19,6 @@ public class NEATGraphUI_Canvas : MonoBehaviour
     public int yStepCount = 5;
     public Font labelFont;
     public Text infoText;
-    public Text platformTimerText; // Assign in Inspector
-
 
     private List<GameObject> pointObjects = new();
     private List<RectTransform> lineSegments = new();
@@ -32,7 +30,9 @@ public class NEATGraphUI_Canvas : MonoBehaviour
         if (gameManager == null)
             gameManager = GameManager.instance;
     }
-
+    /// <summary>
+    /// Updates the graph every frame.
+    /// </summary>
     void Update()
     {
         if (gameManager == null || gameManager.neatManager == null)
@@ -47,7 +47,7 @@ public class NEATGraphUI_Canvas : MonoBehaviour
             DrawYAxis();
             yAxisDrawn = true;
         }
-
+        /// Update the graph with the latest fitness history
         ShowGraph(fitnessHistory);
 
         if (infoText != null)
@@ -55,7 +55,6 @@ public class NEATGraphUI_Canvas : MonoBehaviour
             int gen = gameManager.neatManager.CurrentGeneration;
             float lastBest = gameManager.neatManager.LastBestFitness;
             float allTimeBest = gameManager.neatManager.AllTimeBestFitness;
-            //print(timer);
             infoText.text = $"Generation: {gen}\n" +
                             $"Current Best: {lastBest:F2}\n" +
                             $"All-Time Best: {allTimeBest:F2}";
@@ -103,7 +102,11 @@ public class NEATGraphUI_Canvas : MonoBehaviour
             xPos += xStep;
         }
     }
-
+    /// <summary>
+    /// Creates a point (dot) at the specified anchored position.
+    /// </summary>
+    /// <param name="anchoredPosition"></param>
+    /// <returns></returns>
     GameObject CreatePoint(Vector2 anchoredPosition)
     {
         GameObject point = new GameObject("point", typeof(Image));
@@ -120,6 +123,13 @@ public class NEATGraphUI_Canvas : MonoBehaviour
         return point;
     }
 
+    /// <summary>
+    /// creating a line between two points
+    /// </summary>
+    /// <param name="a"></param>
+    /// <param name="b"></param>
+    /// <param name="prevValue"></param>
+    /// <param name="currentValue"></param>
     void CreateLineBetween(Vector2 a, Vector2 b, float prevValue, float currentValue)
     {
         GameObject line = new GameObject("line", typeof(Image));
@@ -144,6 +154,12 @@ public class NEATGraphUI_Canvas : MonoBehaviour
         lineSegments.Add(rt);
     }
 
+    /// <summary>
+    /// creating x-axis labels
+    /// </summary>
+    /// <param name="index"></param>
+    /// <param name="xPos"></param>
+    /// <param name="generationNumber"></param>
     void CreateXLabel(int index, float xPos, int generationNumber)
     {
         GameObject label = new GameObject("xLabel", typeof(Text));
@@ -168,6 +184,9 @@ public class NEATGraphUI_Canvas : MonoBehaviour
         xAxisLabels.Add(label);
     }
 
+    /// <summary>
+    /// creating y-axis labels
+    /// </summary>
     void DrawYAxis()
     {
         float graphHeight = graphContainer.sizeDelta.y;
@@ -198,7 +217,9 @@ public class NEATGraphUI_Canvas : MonoBehaviour
             lrt.sizeDelta = new Vector2(40, 30);
         }
     }
-
+    /// <summary>
+    /// Clears the graph by destroying all point objects, line segments, and x-axis labels.
+    /// </summary>
     void ClearGraph()
     {
         foreach (var p in pointObjects)

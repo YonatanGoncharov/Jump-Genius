@@ -12300,63 +12300,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 761074485}
   m_CullTransparentMesh: 1
---- !u!1001 &768271058
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 5696524819987591223, guid: 7f824432e1f01e74b8f9f39d039a561b, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -11.06
-      objectReference: {fileID: 0}
-    - target: {fileID: 5696524819987591223, guid: 7f824432e1f01e74b8f9f39d039a561b, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 5.71
-      objectReference: {fileID: 0}
-    - target: {fileID: 5696524819987591223, guid: 7f824432e1f01e74b8f9f39d039a561b, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5696524819987591223, guid: 7f824432e1f01e74b8f9f39d039a561b, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5696524819987591223, guid: 7f824432e1f01e74b8f9f39d039a561b, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5696524819987591223, guid: 7f824432e1f01e74b8f9f39d039a561b, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5696524819987591223, guid: 7f824432e1f01e74b8f9f39d039a561b, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5696524819987591223, guid: 7f824432e1f01e74b8f9f39d039a561b, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5696524819987591223, guid: 7f824432e1f01e74b8f9f39d039a561b, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5696524819987591223, guid: 7f824432e1f01e74b8f9f39d039a561b, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7183240769112053809, guid: 7f824432e1f01e74b8f9f39d039a561b, type: 3}
-      propertyPath: m_Name
-      value: AgentPrefab
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 7f824432e1f01e74b8f9f39d039a561b, type: 3}
 --- !u!1 &769736321
 GameObject:
   m_ObjectHideFlags: 0
@@ -34989,8 +34932,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   populationSize: 150
-  inputCount: 11
-  outputCount: 4
+  inputCount: 6
+  outputCount: 2
   bestFitnessHistory: []
   agentPrefab: {fileID: 0}
   spawnPoint: {fileID: 0}
@@ -35007,17 +34950,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stageReward: 200
-  heightReward: 15
-  verticalDistReward: 5
-  platformReward: 30
+  platformTopReward: 100
+  verticalGainReward: 30
   airTimeReward: 0.5
-  exitBonus: 500
-  efficiencyBonus: 30
-  movePenalty: 5
   fallPenalty: 100
   idlePenalty: 5
-  wallPushPenalty: 50
-  scoreScale: 0.1
+  sideClingPenalty: 50
+  movePenalty: 5
+  efficiencyBonus: 30
+  scoreScale: 0.033
 --- !u!1 &1780536645
 GameObject:
   m_ObjectHideFlags: 0
@@ -41505,7 +41446,6 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 2069592807}
-  - {fileID: 768271058}
   - {fileID: 619394802}
   - {fileID: 243301612}
   - {fileID: 1751606252}

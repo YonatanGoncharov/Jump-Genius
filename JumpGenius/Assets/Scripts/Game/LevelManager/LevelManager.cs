@@ -4,27 +4,31 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Central authority that organises LevelStage instances, keeps track
-/// of the player’s current stage, and positions the main camera.
+/// Manages the different stages of the level, tracks the current stage,
+/// and controls the main camera's position to follow the active part of the level.
 /// </summary>
 public class LevelManager : MonoBehaviour
 {
     public static LevelManager instance;
 
+    [Tooltip("A list of LevelStage objects defining the level's structure.")]
     public List<LevelStage> levels;
     private int currentStageIndex = 0;
 
     /// <summary>
-    /// Exposes the current stage index for external scripts.
+    /// Provides read-only access to the current stage index.
     /// </summary>
     public int CurrentStageIndex => currentStageIndex;
 
+    [Tooltip("The main camera in the scene.")]
     public Camera mainCamera;
+    [Tooltip("Vertical offset to apply to the camera's Y position relative to the stage.")]
     public float cameraYOffset = 5f;
     private float startingYPosition;
 
     private void Awake()
     {
+        // Singleton pattern to ensure only one LevelManager exists
         if (instance == null)
             instance = this;
         else
@@ -33,20 +37,25 @@ public class LevelManager : MonoBehaviour
             return;
         }
 
+        // Load the level stages by finding GameObjects tagged as "Stage" in the scene
         LoadStagesFromScene();
     }
 
     private void Start()
     {
+        // Ensure the main camera is assigned
         if (mainCamera == null)
             mainCamera = Camera.main;
 
+        // Initially position the camera based on the starting stage
         MoveCameraToStage();
         Debug.Log($"Loaded {levels.Count} levels");
     }
 
     private void Update()
     {
+        // During training, if GameManager and NEATManager are available,
+        // move the camera to the highest stage reached by any agent.
         if (GameManager.instance.IsTraining && GameManager.instance.neatManager != null)
         {
             int highestStage = 0;
@@ -61,6 +70,10 @@ public class LevelManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns the LevelStage object for the current stage index.
+    /// Returns null if the level list is invalid or the index is out of bounds.
+    /// </summary>
     public LevelStage GetCurrentStage()
     {
         if (levels == null || levels.Count == 0 ||
@@ -69,6 +82,9 @@ public class LevelManager : MonoBehaviour
         return levels[currentStageIndex];
     }
 
+    /// <summary>
+    /// Advances to the next stage in the level sequence, if available, and moves the camera.
+    /// </summary>
     public void GoToNextStage()
     {
         if (currentStageIndex < levels.Count - 1)
@@ -78,6 +94,9 @@ public class LevelManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Moves to the previous stage in the level sequence, if available, and moves the camera.
+    /// </summary>
     public void GoToPreviousStage()
     {
         if (currentStageIndex > 0)
@@ -87,6 +106,10 @@ public class LevelManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Finds all GameObjects tagged as "Stage" in the scene, sorts them by their Y position,
+    /// and creates LevelStage objects for each, including their child "Platform" objects.
+    /// </summary>
     public void LoadStagesFromScene()
     {
         var stageObjects = GameObject.FindGameObjectsWithTag("Stage");
@@ -112,6 +135,11 @@ public class LevelManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Moves the main camera to focus on the specified stage index.
+    /// If no index is provided, it defaults to the current stage index.
+    /// </summary>
+    /// <param name="targetStageIndex">The index of the stage to move the camera to.</param>
     public void MoveCameraToStage(int targetStageIndex = -1)
     {
         if (targetStageIndex == -1)
@@ -121,10 +149,12 @@ public class LevelManager : MonoBehaviour
             return;
 
         currentStageIndex = targetStageIndex;
+        // Calculate the desired Y position for the camera based on the stage's bottom and the Y offset
         float stageBottomY = levels[currentStageIndex]
-                             .stageObject.transform.position.y + cameraYOffset;
+                                    .stageObject.transform.position.y + cameraYOffset;
         startingYPosition = stageBottomY;
 
+        // Update the camera's position, keeping its X and Z the same
         mainCamera.transform.position = new Vector3(
             mainCamera.transform.position.x,
             startingYPosition,
@@ -132,6 +162,10 @@ public class LevelManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Updates the camera's Y position to follow the player's (or agent's) Y position.
+    /// </summary>
+    /// <param name="playerPosition">The current world position of the player or agent.</param>
     public void UpdateCameraPosition(Vector3 playerPosition)
     {
         if (mainCamera == null) return;
@@ -143,34 +177,45 @@ public class LevelManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Returns the world-space Y of the active stage origin.
+    /// Returns the world-space Y coordinate of the bottom of the currently active stage.
     /// </summary>
+    /// <returns>The Y position of the current level's origin.</returns>
     public float GetCurrentLevelHeight()
         => levels[currentStageIndex].stageObject.transform.position.y;
 
     /// <summary>
-    /// Returns the current stage index (for legacy callers).
+    /// Returns the current stage index. Primarily for legacy compatibility.
     /// </summary>
+    /// <param name="agent">The transform of the agent (not currently used in this implementation).</param>
+    /// <returns>The index of the current level stage.</returns>
     public int GetCurrentStageIndex(Transform agent)
         => currentStageIndex;
 
     /// <summary>
-    /// Finds the stage index containing a given worldY.
+    /// Determines the stage index that contains a given world Y coordinate.
+    /// Iterates through the stages and checks if the Y coordinate falls within the vertical bounds of each stage.
     /// </summary>
+    /// <param name="worldY">The world Y coordinate to check.</param>
+    /// <returns>The index of the stage containing the world Y, or 0 if none is found.</returns>
     public int GetStageIndexByY(float worldY)
     {
         for (int i = 0; i < levels.Count; i++)
         {
             float y = levels[i].stageObject.transform.position.y;
+            // Determine the Y coordinate of the next stage to define the upper bound
             float nextY = (i == levels.Count - 1)
                 ? float.PositiveInfinity
                 : levels[i + 1].stageObject.transform.position.y;
+            // If the worldY is within the current stage's vertical range, return its index
             if (worldY >= y && worldY < nextY)
                 return i;
         }
-        return 0;
+        return 0; // Default to the first stage if no match is found
     }
 
+    /// <summary>
+    /// Logs the Y position of all platforms within each level stage for debugging purposes.
+    /// </summary>
     public void DebugPrintAllPlatformHeights()
     {
         Debug.Log("PLATFORM HEIGHTS BY STAGE:");
@@ -179,13 +224,15 @@ public class LevelManager : MonoBehaviour
             Debug.Log($"Stage {i}:");
             foreach (var platform in levels[i].platforms)
             {
-                Debug.Log($"   ↳ Platform Y: {platform.transform.position.y:F2}");
+                Debug.Log($"    ↳ Platform Y: {platform.transform.position.y:F2}");
             }
         }
     }
     /// <summary>
-    /// Return the world‐space position of the exit door (tagged "Door").
+    /// Returns the world-space position of the GameObject tagged as "Door".
+    /// This is likely the exit point of the level.
     /// </summary>
+    /// <returns>The Vector2 position of the exit door, or Vector2.zero if no door is found.</returns>
     public Vector2 GetExitPosition()
     {
         var door = GameObject.FindGameObjectWithTag("Door");

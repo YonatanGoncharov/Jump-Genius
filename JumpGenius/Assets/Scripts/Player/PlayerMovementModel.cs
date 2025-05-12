@@ -40,8 +40,8 @@ public class PlayerMovementModel
     /// Three rays are cast from the bottom center, left, and right of the collider.
     /// </summary>
     public bool IsGrounded(Transform playerTransform,
-                       Collider2D playerCollider,
-                       out Platform platformHit)
+                           Collider2D playerCollider,
+                           out Platform platformHit)
     {
         platformHit = null;
 
@@ -49,8 +49,7 @@ public class PlayerMovementModel
         float halfWidth = playerCollider.bounds.extents.x;
         float rayLength = 0.12f;
 
-        Vector2 originCenter = (Vector2)playerTransform.position
-                             - new Vector2(0, playerCollider.bounds.extents.y);
+        Vector2 originCenter = new Vector2(playerCollider.bounds.center.x, playerCollider.bounds.min.y);
         Vector2 originLeft = originCenter + Vector2.left * halfWidth;
         Vector2 originRight = originCenter + Vector2.right * halfWidth;
 
@@ -61,7 +60,7 @@ public class PlayerMovementModel
         RaycastHit2D hitLeft = Physics2D.Raycast(originLeft, Vector2.down, rayLength, groundMask);
         RaycastHit2D hitRight = Physics2D.Raycast(originRight, Vector2.down, rayLength, groundMask);
 
-        // debug
+        // debug rays
         Debug.DrawRay(originCenter, Vector2.down * rayLength, Color.red);
         Debug.DrawRay(originLeft, Vector2.down * rayLength, Color.blue);
         Debug.DrawRay(originRight, Vector2.down * rayLength, Color.green);
@@ -82,7 +81,6 @@ public class PlayerMovementModel
 
         return grounded;
     }
-
 
     // ===================== MATERIAL GETTERS =====================
 
